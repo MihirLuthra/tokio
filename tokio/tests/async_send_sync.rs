@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms)]
-#![cfg(feature = "full")]
+#![cfg(any(feature = "full", feature = "full-sgx"))]
 
 use std::cell::Cell;
 use std::io::{Cursor, SeekFrom};
@@ -160,37 +160,41 @@ async_assert_fn!(tokio::io::stdin(): Send & Sync);
 async_assert_fn!(tokio::io::stdout(): Send & Sync);
 async_assert_fn!(tokio::io::Split<Cursor<Vec<u8>>>::next_segment(_): Send & Sync);
 
-async_assert_fn!(tokio::fs::canonicalize(&str): Send & Sync);
-async_assert_fn!(tokio::fs::copy(&str, &str): Send & Sync);
-async_assert_fn!(tokio::fs::create_dir(&str): Send & Sync);
-async_assert_fn!(tokio::fs::create_dir_all(&str): Send & Sync);
-async_assert_fn!(tokio::fs::hard_link(&str, &str): Send & Sync);
-async_assert_fn!(tokio::fs::metadata(&str): Send & Sync);
-async_assert_fn!(tokio::fs::read(&str): Send & Sync);
-async_assert_fn!(tokio::fs::read_dir(&str): Send & Sync);
-async_assert_fn!(tokio::fs::read_link(&str): Send & Sync);
-async_assert_fn!(tokio::fs::read_to_string(&str): Send & Sync);
-async_assert_fn!(tokio::fs::remove_dir(&str): Send & Sync);
-async_assert_fn!(tokio::fs::remove_dir_all(&str): Send & Sync);
-async_assert_fn!(tokio::fs::remove_file(&str): Send & Sync);
-async_assert_fn!(tokio::fs::rename(&str, &str): Send & Sync);
-async_assert_fn!(tokio::fs::set_permissions(&str, std::fs::Permissions): Send & Sync);
-async_assert_fn!(tokio::fs::symlink_metadata(&str): Send & Sync);
-async_assert_fn!(tokio::fs::write(&str, Vec<u8>): Send & Sync);
-async_assert_fn!(tokio::fs::ReadDir::next_entry(_): Send & Sync);
-async_assert_fn!(tokio::fs::OpenOptions::open(_, &str): Send & Sync);
-async_assert_fn!(tokio::fs::DirEntry::metadata(_): Send & Sync);
-async_assert_fn!(tokio::fs::DirEntry::file_type(_): Send & Sync);
+#[cfg(not(target_env = "sgx"))]
+mod fs {
+    use super::*;
+    async_assert_fn!(tokio::fs::canonicalize(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::copy(&str, &str): Send & Sync);
+    async_assert_fn!(tokio::fs::create_dir(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::create_dir_all(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::hard_link(&str, &str): Send & Sync);
+    async_assert_fn!(tokio::fs::metadata(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::read(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::read_dir(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::read_link(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::read_to_string(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::remove_dir(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::remove_dir_all(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::remove_file(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::rename(&str, &str): Send & Sync);
+    async_assert_fn!(tokio::fs::set_permissions(&str, std::fs::Permissions): Send & Sync);
+    async_assert_fn!(tokio::fs::symlink_metadata(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::write(&str, Vec<u8>): Send & Sync);
+    async_assert_fn!(tokio::fs::ReadDir::next_entry(_): Send & Sync);
+    async_assert_fn!(tokio::fs::OpenOptions::open(_, &str): Send & Sync);
+    async_assert_fn!(tokio::fs::DirEntry::metadata(_): Send & Sync);
+    async_assert_fn!(tokio::fs::DirEntry::file_type(_): Send & Sync);
 
-async_assert_fn!(tokio::fs::File::open(&str): Send & Sync);
-async_assert_fn!(tokio::fs::File::create(&str): Send & Sync);
-async_assert_fn!(tokio::fs::File::sync_all(_): Send & Sync);
-async_assert_fn!(tokio::fs::File::sync_data(_): Send & Sync);
-async_assert_fn!(tokio::fs::File::set_len(_, u64): Send & Sync);
-async_assert_fn!(tokio::fs::File::metadata(_): Send & Sync);
-async_assert_fn!(tokio::fs::File::try_clone(_): Send & Sync);
-async_assert_fn!(tokio::fs::File::into_std(_): Send & Sync);
-async_assert_fn!(tokio::fs::File::set_permissions(_, std::fs::Permissions): Send & Sync);
+    async_assert_fn!(tokio::fs::File::open(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::File::create(&str): Send & Sync);
+    async_assert_fn!(tokio::fs::File::sync_all(_): Send & Sync);
+    async_assert_fn!(tokio::fs::File::sync_data(_): Send & Sync);
+    async_assert_fn!(tokio::fs::File::set_len(_, u64): Send & Sync);
+    async_assert_fn!(tokio::fs::File::metadata(_): Send & Sync);
+    async_assert_fn!(tokio::fs::File::try_clone(_): Send & Sync);
+    async_assert_fn!(tokio::fs::File::into_std(_): Send & Sync);
+    async_assert_fn!(tokio::fs::File::set_permissions(_, std::fs::Permissions): Send & Sync);
+}
 
 async_assert_fn!(tokio::net::lookup_host(SocketAddr): Send & Sync);
 async_assert_fn!(tokio::net::TcpListener::bind(SocketAddr): Send & Sync);
@@ -198,12 +202,17 @@ async_assert_fn!(tokio::net::TcpListener::accept(_): Send & Sync);
 async_assert_fn!(tokio::net::TcpStream::connect(SocketAddr): Send & Sync);
 async_assert_fn!(tokio::net::TcpStream::peek(_, &mut [u8]): Send & Sync);
 async_assert_fn!(tokio::net::tcp::ReadHalf::peek(_, &mut [u8]): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::bind(SocketAddr): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::connect(_, SocketAddr): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::send(_, &[u8]): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::recv(_, &mut [u8]): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::send_to(_, &[u8], SocketAddr): Send & Sync);
-async_assert_fn!(tokio::net::UdpSocket::recv_from(_, &mut [u8]): Send & Sync);
+
+#[cfg(not(target_env = "sgx"))]
+mod udp {
+    use super::*;
+    async_assert_fn!(tokio::net::UdpSocket::bind(SocketAddr): Send & Sync);
+    async_assert_fn!(tokio::net::UdpSocket::connect(_, SocketAddr): Send & Sync);
+    async_assert_fn!(tokio::net::UdpSocket::send(_, &[u8]): Send & Sync);
+    async_assert_fn!(tokio::net::UdpSocket::recv(_, &mut [u8]): Send & Sync);
+    async_assert_fn!(tokio::net::UdpSocket::send_to(_, &[u8], SocketAddr): Send & Sync);
+    async_assert_fn!(tokio::net::UdpSocket::recv_from(_, &mut [u8]): Send & Sync);
+}
 
 #[cfg(unix)]
 mod unix_datagram {
@@ -217,10 +226,14 @@ mod unix_datagram {
     async_assert_fn!(tokio::net::UnixStream::connect(&str): Send & Sync);
 }
 
-async_assert_fn!(tokio::process::Child::wait_with_output(_): Send & Sync);
-async_assert_fn!(tokio::signal::ctrl_c(): Send & Sync);
-#[cfg(unix)]
-async_assert_fn!(tokio::signal::unix::Signal::recv(_): Send & Sync);
+#[cfg(not(target_env = "sgx"))]
+mod process_signal {
+    use super::*;
+    async_assert_fn!(tokio::process::Child::wait_with_output(_): Send & Sync);
+    async_assert_fn!(tokio::signal::ctrl_c(): Send & Sync);
+    #[cfg(unix)]
+    async_assert_fn!(tokio::signal::unix::Signal::recv(_): Send & Sync);
+}
 
 async_assert_fn!(tokio::stream::empty<Rc<u8>>(): Send & Sync);
 async_assert_fn!(tokio::stream::pending<Rc<u8>>(): Send & Sync);

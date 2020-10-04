@@ -12,3 +12,6 @@ members = [
   "tests-build",
   "tests-integration",
 ]
+
+[patch.crates-io]
+mio = { git = "https://github.com/mzohreva/mio", branch = "mz/sgx-port-0.7.6" }

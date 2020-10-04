@@ -44,6 +44,19 @@ full = [
   "time",
 ]
 
+# everything possible in SGX
+full-sgx = [
+  "io-util",
+  "io-std",
+  "macros",
+  "net",
+  "rt",
+  "rt-multi-thread",
+  "stream",
+  "sync",
+  "time",
+]
+
 fs = []
 io-util = ["memchr", "bytes"]
 # stdin, stdout, stderr
@@ -120,8 +133,10 @@ optional = true
 [dev-dependencies]
 tokio-test = { version = "0.3.0", path = "../tokio-test" }
 futures = { version = "0.3.0", features = ["async-await"] }
-proptest = "0.10.0"
 tempfile = "3.1.0"
+
+[target.'cfg(not(target_env = "sgx"))'.dev-dependencies]
+proptest = "0.10.0"
 
 [target.'cfg(loom)'.dev-dependencies]
 loom = { version = "0.3.5", features = ["futures", "checkpoint"] }
@@ -135,3 +150,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 features = ["full"]
+
+# set number of threads so tests can run properly
+[package.metadata.fortanix-sgx]
+threads=100

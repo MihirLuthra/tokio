@@ -587,6 +587,7 @@ mod tests {
         assert!(i.next().is_none());
     }
 
+    #[cfg(not(target_env = "sgx"))] // proptest does not compile in SGX
     proptest::proptest! {
         #[test]
         fn fuzz_linked_list(ops: Vec<usize>) {

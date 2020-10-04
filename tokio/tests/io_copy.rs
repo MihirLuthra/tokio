@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms)]
-#![cfg(feature = "full")]
+#![cfg(any(feature = "full", feature = "full-sgx"))]
 
 use tokio::io::{self, AsyncRead, ReadBuf};
 use tokio_test::assert_ok;
